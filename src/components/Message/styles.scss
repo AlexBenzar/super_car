@@ -1,0 +1,11 @@
+@use '../../styles/variables.scss' as *;
+
+.message {
+  background-color: $Charcoal;
+  border-radius: 30px;
+  padding: 20px 30px;
+
+  @media (max-width: $mobileWidth) {
+    padding: 15px 15px;
+  }
+}

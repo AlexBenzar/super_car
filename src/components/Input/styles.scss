@@ -1,0 +1,34 @@
+@use '../../styles/variables.scss' as *;
+
+.input {
+  position: relative;
+  height: 65px;
+  width: 100%;
+
+  &__field {
+    background-color: $Gunmetal;
+    color: $Baby_Blue_Eyes;
+    width: 100%;
+    height: 100%;
+    border: 0;
+    outline: 0;
+    padding-left: 35px;
+    border-radius: 100px;
+    box-sizing: border-box;
+    font-size: 14px;
+
+    &::placeholder {
+      font-size: 14px;
+      color: $Baby_Blue_Eyes;
+    }
+  }
+
+  &__icon {
+    position: absolute;
+    top: 50%;
+    right: 35px;
+    transform: translateY(-50%);
+    width: 24px;
+    height: 24px;
+  }
+}

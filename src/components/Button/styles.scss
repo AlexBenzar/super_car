@@ -1,0 +1,24 @@
+@use '../../styles/variables.scss' as *;
+
+.button {
+  background-color: transparent;
+  height: 50px;
+  border: 2px solid $Baby_Blue_Eyes;
+  border-radius: 100px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 0px 20px;
+  cursor: pointer;
+
+  & > img {
+    width: 20px;
+    height: 20px;
+  }
+
+  @media (max-width: $mobileWidth) {
+    & > p {
+      display: none;
+    }
+  }
+}
