@@ -6,20 +6,20 @@
   width: 100%;
 
   &__field {
-    background-color: $Gunmetal;
-    color: $Baby_Blue_Eyes;
+    background-color: $steel-gray;
+    color: $sky-blue;
     width: 100%;
     height: 100%;
     border: 0;
     outline: 0;
-    padding-left: 35px;
+    padding: 0px 60px 0px 35px;
     border-radius: 100px;
     box-sizing: border-box;
     font-size: 14px;
 
     &::placeholder {
       font-size: 14px;
-      color: $Baby_Blue_Eyes;
+      color: $sky-blue;
     }
   }
 

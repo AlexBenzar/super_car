@@ -1,6 +1,6 @@
 import Typography from '@/components/Typography';
 
-import './styles.scss';
+import styles from './styles.module.scss';
 
 interface MessageProps extends React.HTMLAttributes<HTMLDivElement> {
   text: string;
@@ -8,7 +8,7 @@ interface MessageProps extends React.HTMLAttributes<HTMLDivElement> {
 
 export const Message: React.FC<MessageProps> = ({ text, ...props }) => {
   return (
-    <div className={`message ${props.className}`}>
+    <div className={`${styles['message']} ${props.className}`}>
       <Typography>{text}</Typography>
     </div>
   );
