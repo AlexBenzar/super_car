@@ -12,6 +12,7 @@
   "dependencies": {
     "react": "^19.0.0",
     "react-dom": "^19.0.0",
+    "react-spinners": "^0.15.0",
     "sass": "^1.86.0",
     "vite-tsconfig-paths": "^5.1.4"
   },

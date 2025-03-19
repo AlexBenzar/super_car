@@ -2,10 +2,11 @@ import ArrowSvg from '@/assets/images/arrow.svg';
 
 import styles from './styles.module.scss';
 
-export const Input: React.FC<React.InputHTMLAttributes<HTMLInputElement>> = ({
-  className = '',
-  ...props
-}) => {
+interface InputProps extends React.InputHTMLAttributes<HTMLInputElement> {
+  onSendClick: () => void;
+}
+
+export const Input: React.FC<InputProps> = ({ className = '', onSendClick, ...props }) => {
   return (
     <div className={styles['input']}>
       <input
@@ -14,7 +15,7 @@ export const Input: React.FC<React.InputHTMLAttributes<HTMLInputElement>> = ({
         className={`${styles['input__field']} ${className}`}
       />
 
-      <img src={ArrowSvg} alt="arrow" className={styles['input__icon']} />
+      <img src={ArrowSvg} alt="arrow" className={styles['input__icon']} onClick={onSendClick} />
     </div>
   );
 };
