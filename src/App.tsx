@@ -6,7 +6,7 @@ import { ChatHistory } from '@/components/ChatHistory';
 import { generateSessionId } from '@/helpers/sessionId';
 import { EventType, MessageType } from '@/enums/message';
 import { ChatType } from '@/types/chat';
-
+import { SUGGESTIONS } from '@/constants/suggestions';
 import { getAIResponse } from '@/api/ChatApi';
 
 import styles from '@/App.module.scss';
@@ -44,8 +44,13 @@ function App() {
 
   // Send request to AI
   const onSendQuery = async (query: string) => {
+    const buttonAction = SUGGESTIONS.find((item) => item.action === query);
     // Save user message
-    setChatHistory((prev) => [...prev, { type: MessageType.USER, text: query }]);
+    if (buttonAction) {
+      setChatHistory((prev) => [...prev, { type: MessageType.USER, text: buttonAction.title }]);
+    } else {
+      setChatHistory((prev) => [...prev, { type: MessageType.USER, text: query }]);
+    }
 
     setIsStreaming(true);
 
@@ -59,16 +64,16 @@ function App() {
           ...prev,
           {
             type: MessageType.ERROR,
-            text: 'There was an error on the server, please try again later',
+            text: 'Oops! Something went wrong.',
           },
         ]);
       }
 
       await processStream(response.body);
-    } catch (error) {
+    } catch {
       setChatHistory((prev) => [
         ...prev,
-        { type: MessageType.ERROR, text: `an unexpected error occurred: ${error}` },
+        { type: MessageType.ERROR, text: `Oops! Something went wrong.` },
       ]);
     } finally {
       setIsStreaming(false);

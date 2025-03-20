@@ -43,7 +43,9 @@ export const Input: React.FC<InputProps> = ({
 
   // Send message
   const onArrowClick = () => {
-    if (props.value || (props?.value?.toString()?.length || 0) < INPUT_MAX_LENGTH) {
+    const length = props?.value?.toString()?.length ?? 0;
+
+    if (length > 0 && length < INPUT_MAX_LENGTH) {
       onSendClick();
     }
   };
