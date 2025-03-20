@@ -6,5 +6,5 @@ You can run the Frontend:
 
 ```bash
 docker build -t supersar-assistant-fronend .
-docker run -p 8000:8000 supersar-assistant-fronend
+docker run -p 3000:3000 supersar-assistant-fronend
 ```
