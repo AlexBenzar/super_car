@@ -21,4 +21,8 @@
       display: none;
     }
   }
+
+  &:active {
+    transform: translateY(2px);
+  }
 }

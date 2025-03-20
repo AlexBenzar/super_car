@@ -1,20 +1,23 @@
-import { useEffect, useState } from 'react';
-import styles from '@/App.module.scss';
-import { Button } from '@/components/Button';
-import { Input } from '@/components/Input';
+import { useEffect, useRef, useState } from 'react';
+
 import Typography from '@/components/Typography';
-import { SUGESTIONS } from '@/constants/button';
-import { Message } from '@/components/Message';
+import { ChatMenu } from '@/components/ChatMenu';
+import { ChatHistory } from '@/components/ChatHistory';
 import { generateSessionId } from '@/helpers/sessionId';
-import { BeatLoader } from 'react-spinners';
-import { API_URL } from '@/constants/urls';
+import { EventType, MessageType } from '@/enums/message';
+import { ChatType } from '@/types/chat';
+
+import { getAIResponse } from '@/api/ChatApi';
+
+import styles from '@/App.module.scss';
 
 function App() {
-  const [chat, setChat] = useState<{ type: string; text: string }[]>([]);
+  const [chatHistory, setChatHistory] = useState<ChatType[]>([]);
   const [sessionId, setSessionId] = useState('');
   const [isStreaming, setIsStreaming] = useState(false);
   const [message, setMessage] = useState('');
   const [liveMessage, setLiveMessage] = useState<string[]>([]);
+  const chatRef = useRef<HTMLDivElement>(null);
 
   // Generate sessionId
   useEffect(() => {
@@ -24,52 +27,74 @@ function App() {
   // Save new messages to chat
   useEffect(() => {
     if (!isStreaming && liveMessage.length) {
-      setChat((prev) => [...prev, { type: 'ai', text: liveMessage.join('') }]);
+      setChatHistory((prev) => [...prev, { type: MessageType.AI, text: liveMessage.join('') }]);
       setLiveMessage([]);
     }
   }, [isStreaming, liveMessage]);
 
+  // Scroll to the end of the conversation
+  useEffect(() => {
+    if (chatRef.current) {
+      chatRef.current.scrollTo({
+        top: chatRef.current.scrollHeight,
+        behavior: 'smooth',
+      });
+    }
+  }, [chatHistory]);
+
   // Send request to AI
   const onSendQuery = async (query: string) => {
     // Save user message
-    setChat((prev) => [...prev, { type: 'user', text: query }]);
+    setChatHistory((prev) => [...prev, { type: MessageType.USER, text: query }]);
 
     setIsStreaming(true);
 
     try {
       // Make request to AI
-      const response = await fetch(API_URL, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ query, session_id: sessionId }),
-      });
+      const response = await getAIResponse(query, sessionId);
 
       // Checks for data availability
-      if (!response.body) throw new Error('No data stream from server');
-
-      const reader = response.body.getReader();
-      const decoder = new TextDecoder();
-
-      // Decode data and save it in the liveMessage
-      while (true) {
-        const { done, value } = await reader.read();
-        if (done) break;
-
-        const text = decoder.decode(value);
-        const events = text.trim().split('\r\n');
-        const type = events[0]?.split(': ')[1];
-        const aswear = events[1]?.split(': ')[1];
-
-        if (type === 'chunk' && aswear) {
-          setLiveMessage((prev) => [...prev, aswear]);
-        } else if (type === 'end') {
-          setIsStreaming(false);
-        }
+      if (!response.ok || !response.body) {
+        return setChatHistory((prev) => [
+          ...prev,
+          {
+            type: MessageType.ERROR,
+            text: 'There was an error on the server, please try again later',
+          },
+        ]);
       }
+
+      await processStream(response.body);
     } catch (error) {
-      console.error('Error while taking data:', error);
+      setChatHistory((prev) => [
+        ...prev,
+        { type: MessageType.ERROR, text: `an unexpected error occurred: ${error}` },
+      ]);
     } finally {
       setIsStreaming(false);
+    }
+  };
+
+  // Decode data
+  const processStream = async (responseBody: ReadableStream<Uint8Array<ArrayBufferLike>>) => {
+    const reader = responseBody.getReader();
+    const decoder = new TextDecoder();
+
+    // Decode data and save it in the liveMessage
+    while (true) {
+      const { done, value } = await reader.read();
+      if (done) break;
+
+      const text = decoder.decode(value);
+      const events = text.trim().split('\r\n');
+      const type = events[0]?.split(': ')[1];
+      const answear = events[1]?.split(': ')[1];
+
+      if (type === EventType.CHUNK && answear) {
+        setLiveMessage((prev) => [...prev, answear]);
+      } else if (type === EventType.END) {
+        setIsStreaming(false);
+      }
     }
   };
 
@@ -82,54 +107,24 @@ function App() {
   };
 
   return (
-    <div className={styles['chat']}>
+    <div className={styles['chat']} ref={chatRef}>
       {/* AI chat */}
-      {chat.length ? (
-        <div className={styles['chat__content']}>
-          {chat.map((item) =>
-            item.type === 'user' ? (
-              <Message className={styles['chat__question']} text={item.text} />
-            ) : (
-              <div className={styles['chat__answear']}>
-                <Typography>{item.text}</Typography>
-              </div>
-            ),
-          )}
-          {liveMessage.length && isStreaming ? (
-            <div className={styles['chat__answear']}>
-              <Typography>{liveMessage.join('')}</Typography>
-            </div>
-          ) : !liveMessage.length && isStreaming ? (
-            <BeatLoader color="#a2cff4" />
-          ) : (
-            ''
-          )}
-        </div>
+      {chatHistory.length ? (
+        <ChatHistory chat={chatHistory} isStreaming={isStreaming} liveMessage={liveMessage} />
       ) : (
-        <div className={styles['chat__title']}>
-          <Typography variant="h1">How can i help you?</Typography>
-        </div>
+        <Typography variant="h1" className={styles['chat__title']}>
+          How can i help you?
+        </Typography>
       )}
 
       {/* Field for command input and buttons for AI tools */}
-      <div className={styles['chat__menu']}>
-        <Input
-          value={message}
-          onChange={(e) => setMessage(e.target.value)}
-          onSendClick={onSendMessage}
-        />
-        <div className={styles['chat__buttons']}>
-          {SUGESTIONS.map((item, index) => (
-            <Button
-              key={index}
-              icon={item.icon}
-              onClick={() => onSendQuery(item.action)}
-              disabled={isStreaming}>
-              {item.title}
-            </Button>
-          ))}
-        </div>
-      </div>
+      <ChatMenu
+        inputValue={message}
+        onInputChange={(e) => setMessage(e.target.value)}
+        onInputSendClick={onSendMessage}
+        onButtonClick={(action) => onSendQuery(action)}
+        isStreaming={isStreaming}
+      />
     </div>
   );
 }

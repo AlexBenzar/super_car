@@ -1,0 +1,39 @@
+@use '../../styles/variables.scss' as *;
+
+.history {
+  padding: 20px 50px 200px;
+  display: flex;
+  flex-direction: column;
+  gap: 40px;
+  max-width: $max-content-width;
+  margin: auto;
+  box-sizing: border-box;
+
+  @media (max-width: $laptop-width) {
+    padding-bottom: 300px;
+  }
+
+  @media (max-width: $mobile-width) {
+    padding: 20px 20px 200px;
+  }
+
+  &__question {
+    max-width: 70%;
+    align-self: flex-end;
+  }
+
+  &__answear {
+    max-width: 70%;
+    align-self: flex-start;
+    word-wrap: break-word;
+  }
+
+  &__error {
+    max-width: 70%;
+    color: $ligth-red;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    word-wrap: break-word;
+  }
+}

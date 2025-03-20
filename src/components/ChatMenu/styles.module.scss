@@ -1,0 +1,33 @@
+@use '../../styles/variables.scss' as *;
+
+.menu {
+  max-width: $max-content-width;
+  width: 100%;
+  box-sizing: border-box;
+  display: flex;
+  flex-direction: column;
+  padding: 0 20px 20px;
+  gap: 30px;
+  position: fixed;
+  bottom: 0;
+  left: 50%;
+  transform: translateX(-50%);
+  background-color: $deep-navy;
+
+  &__buttons {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    grid-template-rows: 1fr;
+    align-items: center;
+    gap: 25px;
+
+    @media (max-width: $laptop-width) {
+      grid-template-columns: repeat(2, 1fr);
+    }
+
+    @media (max-width: $mobile-width) {
+      display: flex;
+      gap: 15px;
+    }
+  }
+}
